@@ -1,209 +1,227 @@
 # SecureCode AI
 
-AI-Powered Security Code Analysis Platform
+AI-powered platform for scanning source code and GitHub repositories for common security vulnerabilities.
+
+**Live Demo:** https://secure-code-ai.vercel.app/
 
 ## Overview
 
-SecureCode AI is a comprehensive security analysis platform that uses artificial intelligence to detect vulnerabilities in code. The platform consists of a FastAPI backend with Groq AI integration and a modern React frontend.
+SecureCode AI is split into two applications:
 
-## Features
+- Backend: FastAPI service that runs static checks, optional AI analysis, and returns structured findings.
+- Frontend: React + Vite web app for code input, GitHub repository scanning, and result visualization.
 
-- **AI-Powered Analysis**: Leverages Groq AI for intelligent security vulnerability detection
-- **Code Snippet Scanning**: Analyze individual code snippets for security issues
-- **GitHub Repository Scanning**: Scan entire GitHub repositories
-- **Real-time Results**: Instant security analysis with detailed reports
-- **Multiple Language Support**: Supports JavaScript, Python, Java, C++, C#, PHP, Go, Rust, and more
-- **Security Scoring**: Comprehensive security score calculation
-- **Actionable Fixes**: Detailed remediation suggestions for identified issues
+## About
 
-## Architecture
+SecureCode AI is a developer-focused security tool designed to make vulnerability detection fast and accessible.
+Developers paste a code snippet or provide a GitHub repository URL, and the platform runs static analysis across the codebase,
+maps matches to a vulnerability database, and optionally uses Groq AI to explain the issue and suggest a fix.
+Results are shown in a clean dashboard with a security score, severity breakdown, and per-finding remediation guidance.
+The goal is to give developers immediate security feedback without needing a dedicated security team.
 
-### Backend (FastAPI)
-- **Framework**: FastAPI with automatic API documentation
-- **AI Integration**: Groq API for advanced security analysis
-- **Security Engine**: Custom regex rules and static analysis
-- **GitHub Integration**: Repository cloning and analysis
-- **Models**: Pydantic models for request/response validation
+## Technologies & Languages
 
-### Frontend (React + Vite)
-- **Framework**: React 18 with modern hooks
-- **Build Tool**: Vite for fast development and building
-- **Code Editor**: Monaco Editor for professional code editing
-- **UI Components**: Custom components with responsive design
-- **State Management**: React hooks for local state
-- **API Integration**: Axios for backend communication
+### Backend
+
+| Technology | Language | Used For |
+|---|---|---|
+| FastAPI | Python | REST API framework and endpoint routing |
+| Pydantic | Python | Request/response schema validation |
+| Uvicorn | Python | ASGI server for running FastAPI |
+| Groq AI SDK | Python | AI-powered vulnerability explanation and fix generation |
+| GitPython / subprocess | Python | Cloning GitHub repositories for analysis |
+| Custom regex engine | Python | Static pattern-based vulnerability detection |
+| python-dotenv | Python | Environment variable loading from .env |
+| Docker | — | Containerizing the backend for portable deployment |
+
+### Frontend
+
+| Technology | Language | Used For |
+|---|---|---|
+| React 18 | JavaScript (JSX) | UI component model and application state |
+| Vite | JavaScript | Dev server, build tooling, and API proxy |
+| React Router | JavaScript | Client-side page routing |
+| Axios | JavaScript | HTTP calls to backend endpoints |
+| Monaco Editor | JavaScript | In-browser code editor with syntax highlighting |
+| Tailwind CSS | CSS | Utility-first styling and responsive layout |
+| PostCSS | CSS | CSS transformation pipeline for Tailwind |
+| React Hot Toast | JavaScript | Non-blocking toast notifications |
+| Lucide React | JavaScript | Icon library for UI elements |
+
+## Key Features
+
+- Code snippet scanning via API and UI
+- GitHub repository scanning by repository URL
+- Rule-based static analysis for common vulnerability patterns
+- AI-assisted explanation and remediation recommendations
+- Security score and finding severity reporting
+- Multi-language support for common application codebases
+
+## High-Level Architecture
+
+1. User submits code or repository URL from the frontend.
+2. Frontend calls backend endpoints.
+3. Backend runs static analyzer and vulnerability mapping.
+4. Backend optionally enriches findings through Groq AI.
+5. Frontend renders findings, scores, and suggested fixes.
 
 ## Quick Start
 
 ### Prerequisites
 
-- **Python 3.8+** for backend
-- **Node.js 16+** for frontend
-- **Git** for repository operations
+- Python 3.8+
+- Node.js 16+
+- Git
 
-### Backend Setup
+### 1) Start Backend
 
-1. **Navigate to the backend directory:**
-   ```bash
-   cd backend
-   ```
+Option A: Run backend with Docker (as requested):
 
-2. **(Optional) Create and activate a virtual environment:**
-   ```bash
-   python -m venv venv
-   source venv/Scripts/activate   # Windows
-   source venv/bin/activate      # macOS/Linux
-   ```
+```bash
+cd backend
+docker run -p 8000:8000 --env-file .env securecode-backend
+```
 
-3. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Test backend API docs:
 
-4. **Set up environment variables:**
-   Create a `.env` file with your Groq API key (required for AI analysis):
-   ```env
-   GROQ_API_KEY=your_groq_api_key_here
-   ```
+```text
+http://localhost:8000/docs
+```
 
-5. **Start the backend server:**
-   ```bash
-   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
+Option B: Run backend locally with Python:
 
-   The API will be available at `http://localhost:8000`
+```bash
+cd backend
+python -m venv venv
+# Windows PowerShell
+venv\Scripts\Activate.ps1
+# macOS/Linux
+source venv/bin/activate
 
-### Frontend Setup
+pip install -r requirements.txt
+```
 
-1. **Navigate to frontend directory:**
-   ```bash
-   cd frontend
-   ```
+Create backend/.env:
 
-2. **Install Node.js dependencies:**
-   ```bash
-   npm install
-   ```
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
 
-3. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+Run backend:
 
-   The frontend will be available at `http://localhost:5173`
+```bash
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 2) Start Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend URL: http://localhost:5173
+Backend URL: http://localhost:8000
 
 ## API Endpoints
 
-### Health Check
-- `GET /health/` - Check backend status
+- GET /health/
+- POST /scan/
+- POST /github-scan?repo_url=<https://github.com/owner/repo>
 
-### Code Scanning
-- `POST /scan/` - Analyze code snippet
-  ```json
-  {
-    "code": "your code here"
-  }
-  ```
+Sample request for POST /scan/:
 
-### GitHub Scanning
-- `POST /github-scan` - Analyze a GitHub repository
-  - Expected input: a URL query parameter named `repo_url`
-  - Example:
-    ```
-    POST /github-scan?repo_url=https://github.com/owner/repo
-    ```
-
-## Usage Examples
-
-### Code Scanning
-```javascript
-// Example vulnerable code
-const express = require('express');
-const app = express();
-
-app.get('/user/:id', (req, res) => {
-  // SQL Injection vulnerability
-  const query = "SELECT * FROM users WHERE id = " + req.params.id;
-  // ... rest of code
-});
+```json
+{
+  "code": "const query = \"SELECT * FROM users WHERE id = \" + userInput;"
+}
 ```
 
-### GitHub Repository
-```
-https://github.com/expressjs/express
-```
+## Repository Structure
 
-## Security Analysis Types
-
-- **Injection Attacks**: SQL injection, XSS, command injection
-- **Authentication Issues**: Weak passwords, improper session handling
-- **Authorization Flaws**: Access control vulnerabilities
-- **Data Exposure**: Sensitive data leakage
-- **Cryptography Issues**: Weak encryption, improper key management
-- **Configuration Errors**: Misconfigurations, exposed secrets
-- **Input Validation**: Improper input sanitization
-
-## Development
-
-### Backend Development
-- Uses FastAPI for automatic API documentation
-- Modular architecture with separate services
-- Comprehensive error handling
-- Async operations for performance
-
-### Frontend Development
-- Component-based architecture
-- Responsive design with custom CSS
-- Real-time code editing with Monaco
-- Toast notifications for user feedback
-
-## Project Structure
-
-```
+```text
 securecode-ai/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI application
-│   │   ├── api/                 # API endpoints
-│   │   │   ├── scan.py
-│   │   │   ├── github_scan.py
-│   │   │   └── health.py
-│   │   ├── models/              # Pydantic models
-│   │   ├── services/            # Business logic
-│   │   ├── security/            # Security analysis
-│   │   └── utils/               # Utilities
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── utils/
-│   ├── package.json
-│   └── vite.config.js
-├── docs/
-├── infrastructure/
-├── scripts/
-└── tests/
+|-- README.md
+|-- backend/
+|   |-- README.md
+|   |-- Dockerfile
+|   |-- requirements.txt
+|   `-- app/
+|       |-- main.py
+|       |-- ai/groq_client.py
+|       |-- api/
+|       |   |-- scan.py
+|       |   |-- github_scan.py
+|       |   `-- health.py
+|       |-- models/
+|       |   |-- scan_request.py
+|       |   `-- scan_response.py
+|       |-- security/
+|       |   |-- regex_rules.py
+|       |   |-- static_analyzer.py
+|       |   `-- vulnerability_db.py
+|       |-- services/
+|       |   |-- ai_service.py
+|       |   |-- github_service.py
+|       |   `-- scanner_service.py
+|       `-- utils/
+|           |-- config.py
+|           `-- logger.py
+`-- frontend/
+    |-- README.md
+    |-- index.html
+    |-- package.json
+    |-- postcss.config.js
+    |-- tailwind.config.js
+    |-- vite.config.js
+    |-- scripts/inspect_githubscanner.py
+    `-- src/
+        |-- main.jsx
+        |-- App.jsx
+        |-- index.css
+        |-- components/
+        |   |-- CodeEditor.jsx
+        |   |-- Navbar.jsx
+        |   |-- ResultCard.jsx
+        |   |-- ScanButton.jsx
+        |   |-- SecurityScore.jsx
+        |   `-- ThemeToggle.jsx
+        |-- pages/
+        |   |-- Dashboard.jsx
+        |   |-- GitHubScanner.jsx
+        |   `-- ScanPage.jsx
+        |-- services/api.js
+        `-- utils/
+            |-- helpers.js
+            `-- storage.js
 ```
+
+## What Each Top-Level README Covers
+
+- Root README (this file): overall architecture, full setup flow, and repository map.
+- backend/README.md: backend internals, API behavior, and backend file responsibilities.
+- frontend/README.md: frontend internals, page/component flow, and frontend file responsibilities.
+
+## Security Coverage Areas
+
+- Injection flaws (SQLi, command injection, XSS-style patterns)
+- Authentication and authorization weaknesses
+- Sensitive data exposure patterns
+- Cryptography misuse indicators
+- Configuration and input validation issues
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is open source. See LICENSE file for details.
+1. Fork the repository.
+2. Create a feature branch.
+3. Make changes with clear commit history.
+4. Update docs when behavior changes.
+5. Open a pull request.
 
 ## Support
 
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation in the `docs/` folder
-- Review the API documentation at `/docs` when backend is running
+- Open a GitHub issue for bugs or feature requests.
+- Review backend docs in backend/README.md.
+- Review frontend docs in frontend/README.md.
+- Inspect live API docs at http://localhost:8000/docs while backend is running.
